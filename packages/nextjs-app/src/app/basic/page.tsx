@@ -6,6 +6,7 @@ import Link from 'next/link';
 export default function BasicPage() {
   const [text, setText] = useState('');
   const [targetLang, setTargetLang] = useState<'ja' | 'en'>('en');
+  const [useNodeStream, setUseNodeStream] = useState(false);
   const [result, setResult] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationTime, setTranslationTime] = useState<number | null>(null);
@@ -25,7 +26,7 @@ export default function BasicPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text, targetLang }),
+        body: JSON.stringify({ text, targetLang, useNodeStream }),
       });
 
       if (!response.ok) {
@@ -76,6 +77,16 @@ export default function BasicPage() {
               <option value="ja">日本語</option>
               <option value="en">英語</option>
             </select>
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={useNodeStream}
+              onChange={(e) => setUseNodeStream(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">Node.js Stream API を使用する</span>
           </label>
         </div>
 
