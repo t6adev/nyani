@@ -21,6 +21,9 @@ importers:
 
   packages/nextjs-app:
     dependencies:
+      my-api:
+        specifier: workspace:*
+        version: link:../my-api
       next:
         specifier: 15.5.6
         version: 15.5.6(react-dom@19.1.0)(react@19.1.0)
