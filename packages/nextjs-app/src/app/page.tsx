@@ -14,6 +14,14 @@ export default function Home() {
               Basic - シンプルな翻訳
             </Link>
           </li>
+          <li>
+            <Link
+              href="/basic-routing"
+              className="text-blue-600 hover:underline text-lg"
+            >
+              Basic Routing - 翻訳履歴とルーティング
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
