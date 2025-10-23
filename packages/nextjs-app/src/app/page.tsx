@@ -22,6 +22,14 @@ export default function Home() {
               Basic Routing - 翻訳履歴とルーティング
             </Link>
           </li>
+          <li>
+            <Link
+              href="/nani"
+              className="text-blue-600 hover:underline text-lg"
+            >
+              Nani!? - nani.now クローン
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
