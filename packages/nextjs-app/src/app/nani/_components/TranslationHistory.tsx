@@ -37,7 +37,7 @@ export function TranslationHistory({ currentId }: Props) {
   };
 
   return (
-    <div className="h-full bg-gray-50 border-r border-gray-200 overflow-y-auto">
+    <div className="h-full overflow-y-auto">
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-sm font-semibold text-gray-700">履歴 🔒</h2>
       </div>

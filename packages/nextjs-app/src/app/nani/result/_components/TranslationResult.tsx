@@ -79,32 +79,24 @@ function ResultContent() {
 
   return (
     <>
-      {originalText && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 mb-2">翻訳元テキスト</h2>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <p className="whitespace-pre-wrap text-gray-700">{originalText}</p>
-          </div>
-          <div className="mt-2 text-sm text-gray-500">
-            翻訳先: {targetLang === 'ja' ? '日本語' : '英語'}
+      <div className="flex flex-col gap-4">
+        <div className="bg-gray-50 rounded-xl shadow-sm">
+          <div className="bg-slate-100 rounded-xl overflow-scroll h-32 m-2">
+            <p className="whitespace-pre-wrap text-gray-700 px-4 py-3">{originalText}</p>
           </div>
         </div>
-      )}
-
-      <div>
-        <div className="flex items-center gap-4 mb-4">
-          <h2 className="text-xl font-semibold">翻訳結果</h2>
-          {isTranslating && <span className="text-sm text-blue-600 animate-pulse">翻訳中...</span>}
+        <div className="flex justify-start items-center gap-4">
+          {isTranslating ? (
+            <span className="text-sm text-blue-600 animate-pulse">翻訳中...</span>
+          ) : (
+            <span className="text-sm text-blue-600 ">翻訳しました</span>
+          )}
           {translationTime !== null && (
             <span className="text-sm text-gray-600">({translationTime.toFixed(2)}秒)</span>
           )}
         </div>
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm min-h-64">
-          {result ? (
-            <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">{result}</p>
-          ) : (
-            <p className="text-gray-400">翻訳を開始しています...</p>
-          )}
+          {result && <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">{result}</p>}
         </div>
       </div>
     </>
