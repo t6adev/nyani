@@ -53,9 +53,9 @@ export function TranslationForm() {
           onClick={toggleLanguage}
           className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
         >
-          <span className="font-semibold">{targetLang === 'ja' ? '日本語' : '英語'}</span>
+          <span className="font-semibold">{targetLang === 'en' ? '日本語' : '英語'}</span>
           <span className="text-gray-400">⇄</span>
-          <span className="font-semibold">{targetLang === 'ja' ? '英語' : '日本語'}</span>
+          <span className="font-semibold">{targetLang === 'en' ? '英語' : '日本語'}</span>
         </button>
       </div>
 
