@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
+import { useTranslation } from '../_contexts/TranslationContext';
 
 export function TranslationForm() {
   const [text, setText] = useState('');
   const [targetLang, setTargetLang] = useState<'ja' | 'en'>('en');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { startTranslation } = useTranslation();
 
   const handleSubmit = async () => {
     if (!text.trim()) return;
@@ -17,10 +19,13 @@ export function TranslationForm() {
 
     const id = nanoid();
 
-    // Navigate immediately without waiting for the API response
+    // Start translation streaming in context
+    startTranslation(id, text, targetLang);
+
+    // Navigate to result page
     router.push(`/nani/result?id=${id}`);
 
-    // Send data to server in the background
+    // Send data to server in the background for history
     try {
       await fetch('/nani-api/translations', {
         method: 'POST',
@@ -32,6 +37,8 @@ export function TranslationForm() {
     } catch (error) {
       console.error('Translation error:', error);
     }
+
+    setIsSubmitting(false);
   };
 
   const toggleLanguage = () => {

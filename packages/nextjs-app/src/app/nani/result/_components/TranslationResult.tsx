@@ -1,85 +1,73 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslation } from '../../_contexts/TranslationContext';
 
 function ResultContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+  const { originalText, targetLang, streamPromise } = useTranslation();
 
-  const [translation, setTranslation] = useState<{
-    text: string;
-    targetLang: 'ja' | 'en';
-  } | null>(null);
   const [result, setResult] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationTime, setTranslationTime] = useState<number | null>(null);
 
+  const processingPromiseRef = useRef<Promise<Response> | null>(null);
+
   useEffect(() => {
-    if (!id) return;
+    if (!streamPromise) return;
 
-    fetchTranslation();
-    startTranslation();
-  }, [id]);
-
-  const fetchTranslation = async () => {
-    if (!id) return;
-
-    try {
-      const response = await fetch('/nani-api/translations');
-      const data = await response.json();
-      const currentTranslation = data.translations.find((t: { id: string }) => t.id === id);
-      if (currentTranslation) {
-        setTranslation({
-          text: currentTranslation.text,
-          targetLang: currentTranslation.targetLang,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch translation:', error);
+    if (processingPromiseRef.current === streamPromise) {
+      return;
     }
-  };
 
-  const startTranslation = async () => {
-    if (!id) return;
+    processingPromiseRef.current = streamPromise;
 
-    setIsTranslating(true);
-    setResult('');
-    setTranslationTime(null);
+    const processStream = async () => {
+      setIsTranslating(true);
+      setResult('');
+      setTranslationTime(null);
 
-    const startTime = performance.now();
+      const startTime = performance.now();
 
-    try {
-      const response = await fetch(`/nani-api/translations/${id}/stream`);
+      try {
+        const response = await streamPromise;
 
-      if (!response.ok) {
-        throw new Error('Translation failed');
+        if (!response.ok) {
+          throw new Error('Translation failed');
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error('No reader available');
+        }
+
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            break;
+          }
+
+          const chunk = decoder.decode(value, { stream: true });
+          setResult((prev) => prev + chunk);
+        }
+      } catch (error) {
+        console.error('[TranslationResult] Translation error:', error);
+        setResult('翻訳エラーが発生しました');
+      } finally {
+        const endTime = performance.now();
+        const elapsedTime = (endTime - startTime) / 1000;
+        setTranslationTime(elapsedTime);
+        setIsTranslating(false);
       }
+    };
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error('No reader available');
-      }
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        setResult((prev) => prev + chunk);
-      }
-    } catch (error) {
-      console.error('Translation error:', error);
-      setResult('翻訳エラーが発生しました');
-    } finally {
-      const endTime = performance.now();
-      const elapsedTime = (endTime - startTime) / 1000;
-      setTranslationTime(elapsedTime);
-      setIsTranslating(false);
-    }
-  };
+    processStream();
+  }, [streamPromise]);
 
   if (!id) {
     return (
@@ -91,14 +79,14 @@ function ResultContent() {
 
   return (
     <>
-      {translation && (
+      {originalText && (
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-gray-500 mb-2">翻訳元テキスト</h2>
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <p className="whitespace-pre-wrap text-gray-700">{translation.text}</p>
+            <p className="whitespace-pre-wrap text-gray-700">{originalText}</p>
           </div>
           <div className="mt-2 text-sm text-gray-500">
-            翻訳先: {translation.targetLang === 'ja' ? '日本語' : '英語'}
+            翻訳先: {targetLang === 'ja' ? '日本語' : '英語'}
           </div>
         </div>
       )}
@@ -106,9 +94,7 @@ function ResultContent() {
       <div>
         <div className="flex items-center gap-4 mb-4">
           <h2 className="text-xl font-semibold">翻訳結果</h2>
-          {isTranslating && (
-            <span className="text-sm text-blue-600 animate-pulse">翻訳中...</span>
-          )}
+          {isTranslating && <span className="text-sm text-blue-600 animate-pulse">翻訳中...</span>}
           {translationTime !== null && (
             <span className="text-sm text-gray-600">({translationTime.toFixed(2)}秒)</span>
           )}
