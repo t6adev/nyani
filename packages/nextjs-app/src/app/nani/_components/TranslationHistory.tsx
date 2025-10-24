@@ -1,40 +1,16 @@
-'use client';
-
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-
-type Translation = {
-  id: string;
-  text: string;
-  targetLang: 'ja' | 'en';
-  result?: string;
-  createdAt: string;
-};
+import { naniTranslationStore } from '@/lib/nani-translation-store';
 
 type Props = {
   currentId?: string;
 };
 
+const truncateText = (text: string, maxLength: number = 40) => {
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+};
+
 export function TranslationHistory({ currentId }: Props) {
-  const [translations, setTranslations] = useState<Translation[]>([]);
-
-  useEffect(() => {
-    fetchTranslations();
-  }, []);
-
-  const fetchTranslations = async () => {
-    try {
-      const response = await fetch('/nani-api/translations');
-      const data = await response.json();
-      setTranslations(data.translations);
-    } catch (error) {
-      console.error('Failed to fetch translations:', error);
-    }
-  };
-
-  const truncateText = (text: string, maxLength: number = 40) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  };
+  const translations = naniTranslationStore.getAll();
 
   return (
     <div className="h-full overflow-y-auto">
