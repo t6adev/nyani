@@ -1,14 +1,21 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useRef } from 'react';
+
+type StreamUpdateCallback = (
+  err: Error | null,
+  chunk: string,
+  isCompleted: boolean,
+  elapsedTime?: number
+) => void;
 
 interface TranslationContextType {
   currentTranslationId: string | null;
   originalText: string;
   targetLang: 'ja' | 'en';
-  streamPromise: Promise<Response> | null;
   startTranslation: (id: string, text: string, targetLang: 'ja' | 'en') => void;
-  resetTranslation: () => void;
+  subscribeToStream: (callback: StreamUpdateCallback) => () => void;
+  getLatestResult: () => string;
 }
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
@@ -17,23 +24,61 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
   const [currentTranslationId, setCurrentTranslationId] = useState<string | null>(null);
   const [originalText, setOriginalText] = useState('');
   const [targetLang, setTargetLang] = useState<'ja' | 'en'>('en');
-  const [streamPromise, setStreamPromise] = useState<Promise<Response> | null>(null);
 
-  const startTranslation = useCallback((id: string, text: string, lang: 'ja' | 'en') => {
+  const dataRef = useRef('');
+  const subscribersRef = useRef<Set<StreamUpdateCallback>>(new Set());
+
+  const startTranslation = useCallback(async (id: string, text: string, lang: 'ja' | 'en') => {
     setCurrentTranslationId(id);
     setOriginalText(text);
     setTargetLang(lang);
+    const startTime = performance.now();
+    try {
+      const response = await fetch(`/nani-api/translations/${id}/stream`);
 
-    // Create fetch promise and store it
-    const promise = fetch(`/nani-api/translations/${id}/stream`);
-    setStreamPromise(promise);
+      if (!response.ok) {
+        throw new Error('Translation failed');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      dataRef.current = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+
+        dataRef.current += chunk;
+
+        subscribersRef.current.forEach((callback) => callback(null, chunk, false));
+      }
+      const endTime = performance.now();
+      const elapsedTime = (endTime - startTime) / 1000;
+      subscribersRef.current.forEach((callback) => callback(null, '', true, elapsedTime));
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('[TranslationResult] Translation error:', error);
+        subscribersRef.current.forEach((callback) => callback(error, '', true));
+      }
+    }
   }, []);
 
-  const resetTranslation = useCallback(() => {
-    setCurrentTranslationId(null);
-    setOriginalText('');
-    setTargetLang('en');
-    setStreamPromise(null);
+  const subscribeToStream = useCallback((callback: StreamUpdateCallback) => {
+    subscribersRef.current.add(callback);
+    return () => {
+      subscribersRef.current.delete(callback);
+    };
+  }, []);
+
+  const getLatestResult = useCallback(() => {
+    return dataRef.current;
   }, []);
 
   return (
@@ -42,9 +87,9 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
         currentTranslationId,
         originalText,
         targetLang,
-        streamPromise,
         startTranslation,
-        resetTranslation,
+        subscribeToStream,
+        getLatestResult,
       }}
     >
       {children}

@@ -1,78 +1,39 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '../../_contexts/TranslationContext';
 
 function ResultContent() {
-  const searchParams = useSearchParams();
-  const id = searchParams.get('id');
-  const { originalText, targetLang, streamPromise } = useTranslation();
+  const { originalText, subscribeToStream, getLatestResult } = useTranslation();
 
   const [result, setResult] = useState('');
+  const [hasError, setHasError] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationTime, setTranslationTime] = useState<number | null>(null);
 
-  const processingPromiseRef = useRef<Promise<Response> | null>(null);
-
   useEffect(() => {
-    if (!streamPromise) return;
+    setResult(getLatestResult());
 
-    if (processingPromiseRef.current === streamPromise) {
-      return;
-    }
-
-    processingPromiseRef.current = streamPromise;
-
-    const processStream = async () => {
-      setIsTranslating(true);
-      setResult('');
-      setTranslationTime(null);
-
-      const startTime = performance.now();
-
-      try {
-        const response = await streamPromise;
-
-        if (!response.ok) {
-          throw new Error('Translation failed');
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (!reader) {
-          throw new Error('No reader available');
-        }
-
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          const chunk = decoder.decode(value, { stream: true });
-          setResult((prev) => prev + chunk);
-        }
-      } catch (error) {
-        console.error('[TranslationResult] Translation error:', error);
-        setResult('翻訳エラーが発生しました');
-      } finally {
-        const endTime = performance.now();
-        const elapsedTime = (endTime - startTime) / 1000;
-        setTranslationTime(elapsedTime);
-        setIsTranslating(false);
+    const unsubscribe = subscribeToStream((err, chunk, isCompleted, elapsedTime) => {
+      if (err) {
+        setHasError(true);
+        return;
       }
-    };
+      setResult((prev) => prev + chunk);
+      setIsTranslating(!isCompleted);
+      if (isCompleted && elapsedTime !== undefined) {
+        setTranslationTime(elapsedTime);
+      }
+    });
 
-    processStream();
-  }, [streamPromise]);
+    return unsubscribe;
+  }, [getLatestResult, subscribeToStream]);
 
-  if (!id) {
+  if (hasError) {
     return (
       <div className="flex items-center justify-center">
-        <p className="text-gray-500">翻訳IDが指定されていません</p>
+        <p className="text-gray-500">翻訳エラーが発生しました</p>
       </div>
     );
   }
@@ -104,9 +65,16 @@ function ResultContent() {
 }
 
 export default function TranslationResult() {
-  return (
-    <Suspense fallback={<div className="flex items-center justify-center">Loading...</div>}>
-      <ResultContent />
-    </Suspense>
-  );
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+
+  if (!id) {
+    return (
+      <div className="flex items-center justify-center">
+        <p className="text-gray-500">翻訳IDが指定されていません</p>
+      </div>
+    );
+  }
+
+  return <ResultContent key={id} />;
 }
