@@ -37,6 +37,8 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
   const startTranslation = useCallback(
     async (id: string, text: string, lang: 'ja' | 'en') => {
+      dataRef.current = '';
+
       setCurrentTranslationId(id);
       setOriginalText(text);
       setTargetLang(lang);
@@ -71,8 +73,6 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
         if (!reader) {
           throw new Error('No reader available');
         }
-
-        dataRef.current = '';
 
         while (true) {
           const { done, value } = await reader.read();

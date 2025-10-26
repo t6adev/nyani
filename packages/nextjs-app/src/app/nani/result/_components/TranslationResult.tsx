@@ -73,14 +73,12 @@ function ResultContentByLocalStorage({ id }: { id: string }) {
 function ResultContentByStreaming() {
   const { originalText, subscribeToStream, getLatestResult } = useTranslation();
 
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState(getLatestResult());
   const [hasError, setHasError] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translationTime, setTranslationTime] = useState<number | null>(null);
 
   useEffect(() => {
-    setResult(getLatestResult());
-
     const unsubscribe = subscribeToStream((err, chunk, isCompleted, elapsedTime) => {
       if (err) {
         setHasError(true);
