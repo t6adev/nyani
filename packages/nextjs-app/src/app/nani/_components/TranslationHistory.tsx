@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { naniTranslationStore } from '@/lib/nani-translation-store';
+import { useAtomValue } from 'jotai';
+import { translationHistoryAtom } from '@/lib/translation-history';
 
 type Props = {
   currentId?: string;
@@ -10,7 +13,7 @@ const truncateText = (text: string, maxLength: number = 40) => {
 };
 
 export function TranslationHistory({ currentId }: Props) {
-  const translations = naniTranslationStore.getAll();
+  const translations = useAtomValue(translationHistoryAtom);
 
   return (
     <div className="h-full overflow-y-auto">

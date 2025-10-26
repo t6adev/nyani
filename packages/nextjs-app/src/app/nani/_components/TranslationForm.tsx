@@ -19,24 +19,11 @@ export function TranslationForm() {
 
     const id = nanoid();
 
-    // Start translation streaming in context
+    // Start translation streaming in context (this also saves to localStorage)
     startTranslation(id, text, targetLang);
 
     // Navigate to result page
     router.push(`/nani/result?id=${id}`);
-
-    // Send data to server in the background for history
-    try {
-      await fetch('/nani-api/translations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id, text, targetLang }),
-      });
-    } catch (error) {
-      console.error('Translation error:', error);
-    }
 
     setIsSubmitting(false);
   };

@@ -2,7 +2,9 @@
 
 import { useState, useEffect, ReactNode } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useAtomValue } from 'jotai';
 import { useTranslation } from '../../_contexts/TranslationContext';
+import { translationHistoryAtom, getTranslationById } from '@/lib/translation-history';
 
 function Wrapper({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-4">{children}</div>;
@@ -47,45 +49,11 @@ function ResultBox({ result }: { result: string | null }) {
   );
 }
 
-function ResultContentByDB({ id }: { id: string }) {
-  const [originalText, setOriginalText] = useState('');
-  const [result, setResult] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
+function ResultContentByLocalStorage({ id }: { id: string }) {
+  const history = useAtomValue(translationHistoryAtom);
+  const translation = getTranslationById(history, id);
 
-  useEffect(() => {
-    const fetchTranslation = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/nani-api/translations/${id}`);
-
-        if (!response.ok) {
-          setError(true);
-          return;
-        }
-
-        const data = await response.json();
-        setOriginalText(data.translation.text);
-        setResult(data.translation.result || null);
-      } catch {
-        setError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTranslation();
-  }, [id]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center">
-        <p className="text-gray-500">読み込み中...</p>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!translation) {
     return (
       <div className="flex items-center justify-center">
         <p className="text-gray-500">翻訳が見つかりません</p>
@@ -95,9 +63,9 @@ function ResultContentByDB({ id }: { id: string }) {
 
   return (
     <Wrapper>
-      <OriginalTextBox originalText={originalText} />
+      <OriginalTextBox originalText={translation.text} />
       <TranslationStatus isTranslating={false} translationTime={null} />
-      <ResultBox result={result} />
+      <ResultBox result={translation.result || null} />
     </Wrapper>
   );
 }
@@ -159,7 +127,7 @@ export default function TranslationResult() {
   }
 
   if (currentTranslationId !== id) {
-    return <ResultContentByDB id={id} />;
+    return <ResultContentByLocalStorage id={id} />;
   }
 
   return <ResultContentByStreaming key={id} />;
