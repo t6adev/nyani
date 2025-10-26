@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { TranslationHistory } from './_components/TranslationHistory';
 import { TranslationProvider } from './_contexts/TranslationContext';
 
-export default function NaniLayout({ children }: { children: React.ReactNode }) {
+export default function NyaniLayout({ children }: { children: React.ReactNode }) {
   return (
     <TranslationProvider>
       <div className="flex h-screen">
@@ -12,7 +12,7 @@ export default function NaniLayout({ children }: { children: React.ReactNode }) 
           {/* Logo/Icon */}
           <div className="p-4 flex-shrink-0">
             <Link
-              href="/nani"
+              href="/nyani"
               className="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors"
             >
               <span className="text-2xl">👀</span>

@@ -7,27 +7,18 @@ export default function Home() {
         <h1 className="text-3xl font-bold mb-8">翻訳アプリ</h1>
         <ul className="space-y-4">
           <li>
-            <Link
-              href="/basic"
-              className="text-blue-600 hover:underline text-lg"
-            >
+            <Link href="/basic" className="text-blue-600 hover:underline text-lg">
               Basic - シンプルな翻訳
             </Link>
           </li>
           <li>
-            <Link
-              href="/basic-routing"
-              className="text-blue-600 hover:underline text-lg"
-            >
+            <Link href="/basic-routing" className="text-blue-600 hover:underline text-lg">
               Basic Routing - 翻訳履歴とルーティング
             </Link>
           </li>
           <li>
-            <Link
-              href="/nani"
-              className="text-blue-600 hover:underline text-lg"
-            >
-              Nani!? - nani.now クローン
+            <Link href="/nyani" className="text-blue-600 hover:underline text-lg">
+              Nyani!? - nani.now クローン
             </Link>
           </li>
         </ul>

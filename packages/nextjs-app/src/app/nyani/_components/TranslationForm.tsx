@@ -23,7 +23,7 @@ export function TranslationForm() {
     startTranslation(id, text, targetLang);
 
     // Navigate to result page
-    router.push(`/nani/result?id=${id}`);
+    router.push(`/nyani/result?id=${id}`);
 
     setIsSubmitting(false);
   };

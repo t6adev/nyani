@@ -8,7 +8,7 @@ export type TranslationHistory = {
   createdAt: number;
 };
 
-const STORAGE_KEY = 'nani_translation_history';
+const STORAGE_KEY = 'nyani_translation_history';
 const MAX_HISTORY = 50;
 
 // Create custom storage with localStorage

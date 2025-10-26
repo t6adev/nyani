@@ -55,7 +55,7 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
 
       const startTime = performance.now();
       try {
-        const response = await fetch(`/nani-api/translate`, {
+        const response = await fetch(`/nyani-api/translate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
