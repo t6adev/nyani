@@ -5,5 +5,5 @@
     "dev:nextjs": "pnpm --filter nextjs-app dev",
     "dev:my-api": "pnpm --filter my-api dev"
   },
-  "packageManager": "pnpm@8.11.0"
+  "packageManager": "pnpm@10.19.0"
 }
