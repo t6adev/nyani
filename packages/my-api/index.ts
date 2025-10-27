@@ -28,7 +28,7 @@ export async function translate({
 
   if (clientType === 'groq') {
     const response = await groqClient.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-20b',
       messages: [{ role: 'user', content: prompt }],
       stream: true,
     });
