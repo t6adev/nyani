@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
   const stream = await translate({
     text,
     targetLang,
+    clientType: 'groq',
     useNodeStream: true,
   });
 
