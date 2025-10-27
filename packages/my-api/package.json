@@ -11,11 +11,12 @@
     "dev": "dotenv -e ../../.env -- tsx cli.ts"
   },
   "dependencies": {
-    "@google/genai": "^1.25.0"
+    "@google/genai": "^1.25.0",
+    "groq-sdk": "^0.34.0"
   },
   "devDependencies": {
     "@types/node": "^24.8.1",
-    "tsx": "^4.20.6",
-    "dotenv-cli": "^7.4.2"
+    "dotenv-cli": "^7.4.2",
+    "tsx": "^4.20.6"
   }
 }
