@@ -28,7 +28,11 @@ function TranslationStatus({
   translationTime: number | null;
 }) {
   return (
-    <div className="flex justify-start items-center gap-4">
+    <div
+      className={`flex justify-start items-center gap-4 ${
+        isTranslating ? 'animate-[fadeInUp_0.5s_ease-out_forwards]' : ''
+      }`}
+    >
       {isTranslating ? (
         <span className="text-sm text-blue-600 animate-pulse">翻訳中...</span>
       ) : (
@@ -42,8 +46,20 @@ function TranslationStatus({
 }
 
 function ResultBox({ result }: { result: string | null }) {
+  const [hasContent, setHasContent] = useState(false);
+
+  useEffect(() => {
+    if (result && result.length > 0 && !hasContent) {
+      setHasContent(true);
+    }
+  }, [result, hasContent]);
+
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm min-h-64">
+    <div
+      className={`bg-white p-6 rounded-xl border border-gray-200 shadow-sm min-h-64 ${
+        hasContent ? 'animate-[fadeInUp_0.5s_ease-out_forwards]' : 'opacity-0'
+      }`}
+    >
       {result && <p className="whitespace-pre-wrap text-gray-800 leading-relaxed">{result}</p>}
     </div>
   );
@@ -70,12 +86,17 @@ function ResultContentByLocalStorage({ id }: { id: string }) {
   );
 }
 
-function ResultContentByStreaming() {
-  const { originalText, subscribeToStream, getLatestResult } = useTranslation();
+function FixedParts() {
+  const { originalText } = useTranslation();
+  return <OriginalTextBox originalText={originalText} />;
+}
+
+function StreamingParts() {
+  const { subscribeToStream, getLatestResult } = useTranslation();
 
   const [result, setResult] = useState(getLatestResult());
   const [hasError, setHasError] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(true);
   const [translationTime, setTranslationTime] = useState<number | null>(null);
 
   useEffect(() => {
@@ -85,8 +106,8 @@ function ResultContentByStreaming() {
         return;
       }
       setResult((prev) => prev + chunk);
-      setIsTranslating(!isCompleted);
       if (isCompleted && elapsedTime !== undefined) {
+        setIsTranslating(false);
         setTranslationTime(elapsedTime);
       }
     });
@@ -103,10 +124,18 @@ function ResultContentByStreaming() {
   }
 
   return (
-    <Wrapper>
-      <OriginalTextBox originalText={originalText} />
+    <>
       <TranslationStatus isTranslating={isTranslating} translationTime={translationTime} />
       <ResultBox result={result} />
+    </>
+  );
+}
+
+function ResultContentByStreaming() {
+  return (
+    <Wrapper>
+      <FixedParts />
+      <StreamingParts />
     </Wrapper>
   );
 }
