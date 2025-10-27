@@ -28,7 +28,7 @@ export function TranslationHistory({ currentId }: Props) {
             {translations.map((translation) => (
               <li key={translation.id}>
                 <Link
-                  href={`/nyani/result?id=${translation.id}`}
+                  href={`/result?id=${translation.id}`}
                   className={`block p-3 rounded-lg text-sm hover:bg-gray-100 transition-colors ${
                     currentId === translation.id ? 'bg-blue-50 border border-blue-200' : 'bg-white'
                   }`}

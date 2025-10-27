@@ -1,28 +1,18 @@
-import Link from 'next/link';
+import { TranslationForm } from './_components/TranslationForm';
 
-export default function Home() {
+export default function NyaniPage() {
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">翻訳アプリ</h1>
-        <ul className="space-y-4">
-          <li>
-            <Link href="/basic" className="text-blue-600 hover:underline text-lg">
-              Basic - シンプルな翻訳
-            </Link>
-          </li>
-          <li>
-            <Link href="/basic-routing" className="text-blue-600 hover:underline text-lg">
-              Basic Routing - 翻訳履歴とルーティング
-            </Link>
-          </li>
-          <li>
-            <Link href="/nyani" className="text-blue-600 hover:underline text-lg">
-              Nyani!? - nani.now クローン
-            </Link>
-          </li>
-        </ul>
+    <div className="max-w-2xl w-full">
+      {/* Logo */}
+      <div className="text-center mb-12">
+        <div className="inline-block bg-blue-500 rounded-3xl p-6 mb-6">
+          <div className="text-white text-5xl">👀</div>
+        </div>
+        <h1 className="text-5xl font-bold mb-4">Nyani !?</h1>
       </div>
+
+      {/* Translation Form */}
+      <TranslationForm />
     </div>
   );
 }
